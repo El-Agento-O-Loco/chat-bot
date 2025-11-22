@@ -116,6 +116,10 @@ export default function CommunityPulse() {
     setInputText("");
     await sendMessage(activeUser, inputText);
 
+    // Scroll to top on mobile after sending message (bandaid fix)
+    if (window.innerWidth < 768) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   /**
@@ -126,7 +130,7 @@ export default function CommunityPulse() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden selection:bg-cyan-500 selection:text-white">
+    <div className="flex flex-col md:flex-row bg-slate-950 text-slate-100 font-sans overflow-hidden selection:bg-cyan-500 selection:text-white">
       <Chat
         messages={messages}
         inputText={inputText}

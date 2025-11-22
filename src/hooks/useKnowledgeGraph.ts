@@ -42,7 +42,7 @@ export function useKnowledgeGraph(initialNode?: GraphNode) {
   const addKeyword = useCallback((keyword: string) => {
     setNodes(prevNodes => {
       const updatedNodes = GraphService.addKeywordDirectly(keyword, prevNodes);
-      
+
       // Create links for the new keyword if it was actually added
       const isNewNode = !prevNodes.find(n => n.id.toLowerCase() === keyword.trim().toLowerCase());
       if (isNewNode) {
@@ -51,7 +51,7 @@ export function useKnowledgeGraph(initialNode?: GraphNode) {
           return [...prevLinks, ...newLinks];
         });
       }
-      
+
       return updatedNodes;
     });
   }, []);

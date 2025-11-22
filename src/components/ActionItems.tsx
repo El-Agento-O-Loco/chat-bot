@@ -19,7 +19,7 @@ export default function ActionItems({
   return (
     <div className="md:w-1/3 h-screen flex flex-col bg-slate-900/50">
       {/* Header */}
-      <div className="p-4 border-b border-slate-800 bg-slate-900 flex justify-between items-center">
+      <div className="p-4 border-b border-slate-800 bg-slate-900 flex justify-between items-center flex-shrink-0">
         <div className="flex items-center gap-2">
           {isExtracting ? (
             <Loader2 className="text-emerald-400 w-5 h-5 animate-spin" />

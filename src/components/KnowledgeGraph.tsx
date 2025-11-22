@@ -24,7 +24,7 @@ export default function KnowledgeGraph({
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-900/50 to-slate-950 z-0 pointer-events-none"></div>
 
       {/* Header */}
-      <div className="p-4 border-b border-slate-800 bg-slate-900 z-10 flex justify-between items-center">
+      <div className="p-4 border-b border-slate-800 bg-slate-900 z-10 flex justify-between items-center flex-shrink-0">
         <div className="flex items-center gap-2">
           {isProcessingKeywords ? (
             <Loader2 className="text-purple-400 w-5 h-5 animate-spin" />

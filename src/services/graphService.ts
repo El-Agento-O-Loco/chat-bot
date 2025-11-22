@@ -78,7 +78,7 @@ export class GraphService {
   static createLinksForKeyword(keyword: string, allNodes: GraphNode[], existingLinks: GraphLink[]): GraphLink[] {
     const newLinks: GraphLink[] = [];
     const otherNodes = allNodes.filter(n => n.id !== keyword);
-    
+
     if (otherNodes.length === 0) return newLinks;
 
     // Connect to 1-3 random existing nodes
@@ -89,12 +89,12 @@ export class GraphService {
 
     // Shuffle and pick random nodes
     const shuffled = [...otherNodes].sort(() => Math.random() - 0.5);
-    
+
     for (let i = 0; i < numConnections; i++) {
       const targetNode = shuffled[i];
-      
+
       // Check if link already exists (in either direction)
-      const linkExists = existingLinks.some(link => 
+      const linkExists = existingLinks.some(link =>
         (link.source === keyword && link.target === targetNode.id) ||
         (link.source === targetNode.id && link.target === keyword)
       );
@@ -119,14 +119,14 @@ export class GraphService {
    */
   static generateRandomConnections(allNodes: GraphNode[], existingLinks: GraphLink[], density: number = 0.3): GraphLink[] {
     const newLinks: GraphLink[] = [];
-    
+
     for (let i = 0; i < allNodes.length; i++) {
       for (let j = i + 1; j < allNodes.length; j++) {
         const source = allNodes[i].id;
         const target = allNodes[j].id;
 
         // Check if link already exists
-        const linkExists = existingLinks.some(link => 
+        const linkExists = existingLinks.some(link =>
           (link.source === source && link.target === target) ||
           (link.source === target && link.target === source)
         );

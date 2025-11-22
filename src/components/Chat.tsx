@@ -32,6 +32,7 @@ export default function Chat({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent default form submission and scroll behavior
       onSendMessage();
     }
   };
@@ -39,10 +40,10 @@ export default function Chat({
   return (
     <div className="md:w-1/3 h-screen border-r border-slate-800 flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b border-slate-800 bg-slate-900 flex justify-between items-center shadow-sm">
+      <div className="p-4 border-b border-slate-800 bg-slate-900 flex justify-between items-center shadow-sm flex-shrink-0">
         <div className="flex items-center gap-2">
           <MessageSquare className="text-cyan-400 w-5 h-5" />
-          <h2 className="font-semibold text-lg tracking-wide">DevStream Chat</h2>
+          <h2 className="font-semibold text-lg tracking-wide">Omni The Culture Keeper</h2>
         </div>
         <div className="flex items-center gap-2 text-xs bg-slate-800 px-2 py-1 rounded-full border border-slate-700">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -91,7 +92,7 @@ export default function Chat({
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-slate-900 border-t border-slate-800">
+      <div className="p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
         <div className="flex flex-col gap-3">
           {/* User Selection Controls */}
           <div className="flex justify-between items-center text-xs text-slate-500">
