@@ -36,5 +36,35 @@ export function useKnowledgeGraph(initialNode?: GraphNode) {
     }
   }, []);
 
-  return { nodes, links, updateGraph };
+  /**
+   * Adds a keyword directly to the graph (for AI-generated keywords)
+   */
+  const addKeyword = useCallback((keyword: string) => {
+    setNodes(prevNodes => {
+      const updatedNodes = GraphService.addKeywordDirectly(keyword, prevNodes);
+      
+      // Create links for the new keyword if it was actually added
+      const isNewNode = !prevNodes.find(n => n.id.toLowerCase() === keyword.trim().toLowerCase());
+      if (isNewNode) {
+        setLinks(prevLinks => {
+          const newLinks = GraphService.createLinksForKeyword(keyword.trim(), updatedNodes, prevLinks);
+          return [...prevLinks, ...newLinks];
+        });
+      }
+      
+      return updatedNodes;
+    });
+  }, []);
+
+  /**
+   * Generate additional random connections between nodes
+   */
+  const enrichConnections = useCallback(() => {
+    setLinks(prevLinks => {
+      const newLinks = GraphService.generateRandomConnections(nodes, prevLinks, 0.3);
+      return [...prevLinks, ...newLinks];
+    });
+  }, [nodes]);
+
+  return { nodes, links, updateGraph, addKeyword, enrichConnections };
 }

@@ -14,32 +14,15 @@ export function useAIFeatures() {
   /**
    * Analyze knowledge graph and get AI insights
    */
-  const analyzeGraph = useCallback(async (nodes: GraphNode[], messages: Message[]) => {
+  const analyzeGraph = useCallback(async (nodes: GraphNode[]) => {
     if (nodes.length === 0) return;
 
     setIsAnalyzing(true);
     try {
-      const insight = await AIService.analyzeKnowledgeGraph(nodes, messages);
+      const insight = await AIService.analyzeKnowledgeGraph(nodes);
       setGraphInsight(insight);
     } catch (error) {
       console.error('Graph Analysis Error:', error);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  }, []);
-
-  /**
-   * Analyze conversation context
-   */
-  const analyzeContext = useCallback(async (messages: Message[]) => {
-    if (messages.length < 3) return;
-
-    setIsAnalyzing(true);
-    try {
-      const summary = await AIService.analyzeContext(messages);
-      setContextSummary(summary);
-    } catch (error) {
-      console.error('Context Analysis Error:', error);
     } finally {
       setIsAnalyzing(false);
     }
@@ -67,10 +50,8 @@ export function useAIFeatures() {
 
   return {
     graphInsight,
-    contextSummary,
     isAnalyzing,
     analyzeGraph,
-    analyzeContext,
     extractTasks,
     clearInsights
   };

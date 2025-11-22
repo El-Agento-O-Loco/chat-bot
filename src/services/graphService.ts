@@ -38,6 +38,110 @@ export class GraphService {
   }
 
   /**
+   * Add a keyword directly to the graph (for AI-generated keywords)
+   * @param keyword - The keyword to add
+   * @param existingNodes - Current graph nodes
+   * @returns Updated array of graph nodes
+   */
+  static addKeywordDirectly(keyword: string, existingNodes: GraphNode[]): GraphNode[] {
+    if (!keyword || keyword.trim() === '') {
+      return existingNodes;
+    }
+
+    const cleanKeyword = keyword.trim();
+    const newNodes = [...existingNodes];
+    const existing = newNodes.find(n => n.id.toLowerCase() === cleanKeyword.toLowerCase());
+
+    if (existing) {
+      // Grow existing node
+      existing.size += 15;
+    } else {
+      // Spawn new node near center with random offset
+      newNodes.push({
+        id: cleanKeyword,
+        size: 30,
+        x: 200 + Math.random() * 50,
+        y: 200 + Math.random() * 50
+      });
+    }
+
+    return newNodes;
+  }
+
+  /**
+   * Create random links for a new keyword to existing nodes
+   * @param keyword - The keyword to connect
+   * @param allNodes - All existing nodes
+   * @param existingLinks - Current links (to avoid duplicates)
+   * @returns Array of new links
+   */
+  static createLinksForKeyword(keyword: string, allNodes: GraphNode[], existingLinks: GraphLink[]): GraphLink[] {
+    const newLinks: GraphLink[] = [];
+    const otherNodes = allNodes.filter(n => n.id !== keyword);
+    
+    if (otherNodes.length === 0) return newLinks;
+
+    // Connect to 1-3 random existing nodes
+    const numConnections = Math.min(
+      Math.floor(Math.random() * 3) + 1,
+      otherNodes.length
+    );
+
+    // Shuffle and pick random nodes
+    const shuffled = [...otherNodes].sort(() => Math.random() - 0.5);
+    
+    for (let i = 0; i < numConnections; i++) {
+      const targetNode = shuffled[i];
+      
+      // Check if link already exists (in either direction)
+      const linkExists = existingLinks.some(link => 
+        (link.source === keyword && link.target === targetNode.id) ||
+        (link.source === targetNode.id && link.target === keyword)
+      );
+
+      if (!linkExists) {
+        newLinks.push({
+          source: keyword,
+          target: targetNode.id
+        });
+      }
+    }
+
+    return newLinks;
+  }
+
+  /**
+   * Generate additional random connections between existing nodes
+   * @param allNodes - All nodes in the graph
+   * @param existingLinks - Current links
+   * @param density - Connection density (0-1), default 0.3
+   * @returns Array of new links
+   */
+  static generateRandomConnections(allNodes: GraphNode[], existingLinks: GraphLink[], density: number = 0.3): GraphLink[] {
+    const newLinks: GraphLink[] = [];
+    
+    for (let i = 0; i < allNodes.length; i++) {
+      for (let j = i + 1; j < allNodes.length; j++) {
+        const source = allNodes[i].id;
+        const target = allNodes[j].id;
+
+        // Check if link already exists
+        const linkExists = existingLinks.some(link => 
+          (link.source === source && link.target === target) ||
+          (link.source === target && link.target === source)
+        );
+
+        // Create connection with probability = density
+        if (!linkExists && Math.random() < density) {
+          newLinks.push({ source, target });
+        }
+      }
+    }
+
+    return newLinks;
+  }
+
+  /**
    * Creates links between keywords found in the same message
    * @param messageText - The message text to extract keywords from
    * @returns Array of new graph links

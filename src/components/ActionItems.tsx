@@ -1,8 +1,9 @@
-import { CheckCircle, Trash2, Cpu } from 'lucide-react';
+import { CheckCircle, Trash2, Cpu, Loader2 } from 'lucide-react';
 import type { Task } from '../types';
 
 interface ActionItemsProps {
   tasks: Task[];
+  isExtracting?: boolean;
   onToggleTask: (taskId: number) => void;
   onDeleteTask: (taskId: number) => void;
   onClearAll: () => void;
@@ -10,17 +11,25 @@ interface ActionItemsProps {
 
 export default function ActionItems({
   tasks,
+  isExtracting = false,
   onToggleTask,
   onDeleteTask,
   onClearAll
 }: ActionItemsProps) {
   return (
-    <div className="w-1/3 flex flex-col bg-slate-900/50">
+    <div className="md:w-1/3 h-screen flex flex-col bg-slate-900/50">
       {/* Header */}
       <div className="p-4 border-b border-slate-800 bg-slate-900 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <Cpu className="text-emerald-400 w-5 h-5" />
+          {isExtracting ? (
+            <Loader2 className="text-emerald-400 w-5 h-5 animate-spin" />
+          ) : (
+            <Cpu className="text-emerald-400 w-5 h-5" />
+          )}
           <h2 className="font-semibold text-lg">Action Extraction</h2>
+          {isExtracting && (
+            <span className="text-xs text-emerald-400 animate-pulse">Extracting...</span>
+          )}
         </div>
         <button
           onClick={onClearAll}
@@ -46,16 +55,16 @@ export default function ActionItems({
           <div
             key={task.id}
             className={`group relative p-4 rounded-xl border transition-all duration-300 ${task.completed
-                ? 'bg-slate-900/50 border-slate-800 opacity-50'
-                : 'bg-slate-800 border-slate-700 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-900/10'
+              ? 'bg-slate-900/50 border-slate-800 opacity-50'
+              : 'bg-slate-800 border-slate-700 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-900/10'
               }`}
           >
             <div className="flex items-start gap-3">
               <button
                 onClick={() => onToggleTask(task.id)}
                 className={`mt-1 w-5 h-5 rounded border flex items-center justify-center transition-colors ${task.completed
-                    ? 'bg-emerald-600 border-emerald-600 text-white'
-                    : 'border-slate-500 text-transparent hover:border-emerald-400'
+                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  : 'border-slate-500 text-transparent hover:border-emerald-400'
                   }`}
               >
                 <CheckCircle className="w-3.5 h-3.5" />

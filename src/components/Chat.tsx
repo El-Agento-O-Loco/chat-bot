@@ -37,7 +37,7 @@ export default function Chat({
   };
 
   return (
-    <div className="w-1/3 border-r border-slate-800 flex flex-col">
+    <div className="md:w-1/3 h-screen border-r border-slate-800 flex flex-col">
       {/* Header */}
       <div className="p-4 border-b border-slate-800 bg-slate-900 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-2">
@@ -61,10 +61,10 @@ export default function Chat({
               <span className="text-xs text-slate-500">{msg.user.name} • {msg.timestamp}</span>
             </div>
             <div className={`max-w-[85%] px-4 py-2 rounded-2xl text-sm leading-relaxed shadow-lg ${msg.user.id === 'ai'
-                ? 'bg-slate-800 border border-cyan-900 text-cyan-100 rounded-tl-none'
-                : msg.user.id === activeUser.id
-                  ? 'bg-blue-600 text-white rounded-br-none'
-                  : 'bg-slate-800 text-slate-200 rounded-bl-none'
+              ? 'bg-slate-800 border border-cyan-900 text-cyan-100 rounded-tl-none'
+              : msg.user.id === activeUser.id
+                ? 'bg-blue-600 text-white rounded-br-none'
+                : 'bg-slate-800 text-slate-200 rounded-bl-none'
               }`}>
               {msg.text}
             </div>

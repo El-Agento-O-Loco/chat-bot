@@ -43,6 +43,12 @@ export function useChat(options: UseChatOptions = {}) {
           const aiMessage = MessageService.createMessage(AI_AGENT, aiResponse.text);
           setMessages(prev => [...prev, aiMessage]);
           setIsAIThinking(false);
+
+          // Add keywords to graph if present
+          if (aiResponse.keywords && onMessageSent) {
+            const aiMsg = { ...aiMessage, keywords: aiResponse.keywords };
+            onMessageSent(aiMsg as any);
+          }
         }, AIService.getTypingDelay());
       } else {
         setIsAIThinking(false);

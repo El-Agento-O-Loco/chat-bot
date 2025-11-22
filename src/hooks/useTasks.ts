@@ -25,6 +25,8 @@ export function useTasks(initialTasks: Task[] = []) {
    * Add tasks from AI extraction (array of task strings)
    */
   const addAITasks = useCallback((taskTexts: string[], assignedTo: string) => {
+    console.log('addAITasks called with:', { taskTexts, assignedTo });
+
     const newTasks: Task[] = taskTexts.map(text => ({
       id: generateId(),
       text,
@@ -32,8 +34,15 @@ export function useTasks(initialTasks: Task[] = []) {
       completed: false
     }));
 
+    console.log('Created task objects:', newTasks);
+
     if (newTasks.length > 0) {
-      setTasks(prev => [...prev, ...newTasks]);
+      setTasks(prev => {
+        console.log('Previous tasks:', prev);
+        const updated = [...prev, ...newTasks];
+        console.log('Updated tasks:', updated);
+        return updated;
+      });
     }
 
     return newTasks;

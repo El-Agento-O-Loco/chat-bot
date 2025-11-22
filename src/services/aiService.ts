@@ -4,63 +4,37 @@ import { chatCompletion, type ChatMessage } from './apiService';
 export interface AIResponse {
   shouldRespond: boolean;
   text: string;
+  keywords?: string[];
 }
 
-/**
- * AI Service - Handles all AI-powered features using real backend
- */
 export class AIService {
   /**
-   * Get AI response for a chat message
-   * @param messageText - The user's message
-   * @param activeUser - The user who sent the message
-   * @param conversationHistory - Recent messages for context
-   * @returns AIResponse with decision and text
+   * Get AI response + extract keywords for graph
    */
   static async getResponse(
     messageText: string,
     activeUser: User,
     conversationHistory: Message[] = []
   ): Promise<AIResponse> {
-    const lowerText = messageText.toLowerCase();
-
-    // Check if AI should respond
-    const shouldRespond =
-      lowerText.includes("@omni") ||
-      lowerText.includes("deployment") ||
-      lowerText.includes("error") ||
-      lowerText.includes("help") ||
-      lowerText.includes("?");
-
-    if (!shouldRespond) {
-      return { shouldRespond: false, text: "" };
-    }
-
     try {
-      // Build conversation context (last 5 messages)
       const recentMessages = conversationHistory.slice(-5);
       const messages: ChatMessage[] = [
         {
           role: 'system',
-          content: `You are Omni, an AI assistant helping a development team. You're observing a chat between team members: Dev Lead, Stakeholder, and Data Scientist.
+          content: `You are Omni, an AI assistant helping a development team.
 
 Your role:
-- Provide helpful technical insights
-- Track project context and remind about important details
-- Be concise and professional (1-2 sentences max)
-- Don't apologize or be overly verbose
+- Provide helpful technical insights (1-2 sentences max)
+- Be concise and professional
 - Focus on actionable information
 
-Current context:
-- Team is discussing: ${this.extractTopics(recentMessages).join(", ")}
-- Active user: ${activeUser.name}`
+After your response, on a new line, list 2-5 relevant technical keywords from the conversation.
+Format: KEYWORDS: keyword1, keyword2, keyword3`
         },
-        // Add recent conversation history
         ...recentMessages.map(msg => ({
           role: (msg.user.id === 'ai' ? 'assistant' : 'user') as 'user' | 'assistant',
           content: `${msg.user.name}: ${msg.text}`
         })),
-        // Add current message
         {
           role: 'user',
           content: messageText
@@ -69,13 +43,24 @@ Current context:
 
       const responseText = await chatCompletion(messages);
 
+      // Extract keywords from response
+      const keywords: string[] = [];
+      const keywordMatch = responseText.match(/KEYWORDS:\s*(.+)/i);
+      let cleanResponse = responseText;
+
+      if (keywordMatch) {
+        const keywordStr = keywordMatch[1];
+        keywords.push(...keywordStr.split(',').map(k => k.trim()).filter(k => k));
+        cleanResponse = responseText.replace(/KEYWORDS:.*$/im, '').trim();
+      }
+
       return {
         shouldRespond: true,
-        text: responseText
+        text: cleanResponse,
+        keywords: keywords.length > 0 ? keywords : undefined
       };
     } catch (error) {
       console.error('AI Response Error:', error);
-      // Fallback to simple response
       return {
         shouldRespond: true,
         text: `I'm here to help, ${activeUser.name}. I'm currently experiencing connection issues, but I'm tracking this conversation.`
@@ -83,19 +68,10 @@ Current context:
     }
   }
 
-  /**
-   * Analyze knowledge graph and provide insights
-   */
-  static async analyzeKnowledgeGraph(
-    nodes: GraphNode[],
-    messages: Message[]
-  ): Promise<string> {
+  static async analyzeKnowledgeGraph(nodes: GraphNode[]): Promise<string> {
     if (nodes.length === 0) return "";
-
     try {
       const nodesList = nodes.map(n => `${n.id} (importance: ${n.size})`).join(", ");
-      const recentTopics = this.extractTopics(messages.slice(-10));
-
       const analysisMessages: ChatMessage[] = [
         {
           role: 'system',
@@ -103,13 +79,9 @@ Current context:
         },
         {
           role: 'user',
-          content: `Topics discussed: ${nodesList}
-Recent focus: ${recentTopics.join(", ")}
-
-What's one important insight or potential issue to highlight?`
+          content: `Topics discussed: ${nodesList}\n\nWhat's one important insight or potential issue to highlight?`
         }
       ];
-
       return await chatCompletion(analysisMessages);
     } catch (error) {
       console.error('Graph Analysis Error:', error);
@@ -117,13 +89,7 @@ What's one important insight or potential issue to highlight?`
     }
   }
 
-  /**
-   * Extract tasks from message using AI (better than regex)
-   */
-  static async extractTasks(
-    messageText: string,
-    userName: string
-  ): Promise<string[]> {
+  static async extractTasks(messageText: string, userName: string): Promise<string[]> {
     try {
       const messages: ChatMessage[] = [
         {
@@ -139,76 +105,27 @@ Be strict - only extract clear, actionable tasks.`
       ];
 
       const response = await chatCompletion(messages);
+      console.log('AI Task Extraction Response:', response);
 
-      // Try to parse JSON response
-      try {
-        const tasks = JSON.parse(response);
-        return Array.isArray(tasks) ? tasks : [];
-      } catch {
-        // If not valid JSON, return empty array
-        return [];
+      let cleanedResponse = response.trim();
+      if (cleanedResponse.startsWith('```')) {
+        cleanedResponse = cleanedResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       }
-    } catch (error) {
-      console.error('Task Extraction Error:', error);
+      const jsonMatch = cleanedResponse.match(/\[.*\]/s);
+      if (jsonMatch) {
+        cleanedResponse = jsonMatch[0];
+      }
+
+      const tasks = JSON.parse(cleanedResponse);
+      console.log('Parsed tasks:', tasks);
+      return Array.isArray(tasks) ? tasks : [];
+    } catch (parseError) {
+      console.error('Failed to parse AI task response:', parseError);
       return [];
     }
   }
 
-  /**
-   * Analyze conversation context and provide summary
-   */
-  static async analyzeContext(messages: Message[]): Promise<string> {
-    if (messages.length < 3) return "";
-
-    try {
-      const recentMessages = messages.slice(-10);
-      const conversationText = recentMessages
-        .map(m => `${m.user.name}: ${m.text}`)
-        .join("\n");
-
-      const analysisMessages: ChatMessage[] = [
-        {
-          role: 'system',
-          content: 'Analyze the conversation and provide ONE brief insight about team progress, blockers, or next steps (1 sentence).'
-        },
-        {
-          role: 'user',
-          content: conversationText
-        }
-      ];
-
-      return await chatCompletion(analysisMessages);
-    } catch (error) {
-      console.error('Context Analysis Error:', error);
-      return "";
-    }
-  }
-
-  /**
-   * Get typing delay (simulated)
-   */
   static getTypingDelay(): number {
-    return 1500; // 1.5 seconds
-  }
-
-  /**
-   * Extract topics from messages (helper)
-   */
-  private static extractTopics(messages: Message[]): string[] {
-    const keywords = new Set<string>();
-    const topicWords = ["optimization", "deployment", "budget", "api", "latency",
-                        "model", "gpu", "dataset", "stakeholder", "timeline",
-                        "blocker", "security"];
-
-    messages.forEach(msg => {
-      const text = msg.text.toLowerCase();
-      topicWords.forEach(word => {
-        if (text.includes(word)) {
-          keywords.add(word);
-        }
-      });
-    });
-
-    return Array.from(keywords);
+    return 1500;
   }
 }

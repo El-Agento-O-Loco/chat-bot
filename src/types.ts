@@ -9,6 +9,7 @@ export interface Message {
   user: User;
   text: string;
   timestamp: string;
+  keywords?: string[];
 }
 
 export interface GraphNode {
