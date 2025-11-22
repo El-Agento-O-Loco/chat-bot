@@ -43,7 +43,10 @@ export default function Chat({
       <div className="p-4 border-b border-slate-800 bg-slate-900 flex justify-between items-center shadow-sm flex-shrink-0">
         <div className="flex items-center gap-2">
           <MessageSquare className="text-cyan-400 w-5 h-5" />
-          <h2 className="font-semibold text-lg tracking-wide">Omni The Culture Keeper</h2>
+          <h2 className="font-semibold tracking-wide">
+            <span className="text-2xl">Omni</span>
+            <span className="text-sm text-slate-400 ml-2">The Culture Keeper</span>
+          </h2>
         </div>
         <div className="flex items-center gap-2 text-xs bg-slate-800 px-2 py-1 rounded-full border border-slate-700">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -56,9 +59,17 @@ export default function Chat({
         {messages.map((msg) => (
           <div key={msg.id} className={`flex flex-col ${msg.user.id === activeUser.id ? 'items-end' : 'items-start'}`}>
             <div className={`flex items-center gap-2 mb-1 ${msg.user.id === activeUser.id ? 'flex-row-reverse' : ''}`}>
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${msg.user.color}`}>
-                {msg.user.name.substring(0, 2)}
-              </div>
+              {msg.user.avatar ? (
+                <img 
+                  src={msg.user.avatar} 
+                  alt={msg.user.name}
+                  className="w-7 h-7 rounded-full object-cover border-2 border-slate-600 shadow-md"
+                />
+              ) : (
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold ${msg.user.color} shadow-md`}>
+                  {msg.user.name.substring(0, 2)}
+                </div>
+              )}
               <span className="text-xs text-slate-500">{msg.user.name} • {msg.timestamp}</span>
             </div>
             <div className={`max-w-[85%] px-4 py-2 rounded-2xl text-sm leading-relaxed shadow-lg ${msg.user.id === 'ai'
@@ -74,8 +85,8 @@ export default function Chat({
         {isAIThinking && (
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-700">
-                Om
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold bg-gradient-to-br from-cyan-500 to-purple-600 border-2 border-slate-600 shadow-md">
+                <MessageSquare className="w-3.5 h-3.5 text-white" />
               </div>
               <span className="text-xs text-slate-500">Omni is thinking...</span>
             </div>
