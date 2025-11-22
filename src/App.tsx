@@ -45,11 +45,11 @@ export default function CommunityPulse() {
 
       // If AI provided keywords, add them directly to graph
       if (message.keywords) {
-        setIsProcessingKeywords(true);
         console.log('Adding AI keywords to graph:', message.keywords);
         message.keywords.forEach(keyword => addKeyword(keyword));
-        // Delay to show the loading state (make it visible)
-        setTimeout(() => setIsProcessingKeywords(false), 1000);
+        
+        // Hide loading overlay after AI responds with keywords
+        setTimeout(() => setIsProcessingKeywords(false), 300);
       }
 
       // Try AI task extraction first
@@ -114,6 +114,10 @@ export default function CommunityPulse() {
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
     setInputText("");
+    
+    // Show loading overlay immediately
+    setIsProcessingKeywords(true);
+    
     await sendMessage(activeUser, inputText);
 
     // Scroll to top on mobile after sending message (bandaid fix)
