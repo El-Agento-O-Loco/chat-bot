@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { Message, GraphNode } from '../types';
+import type { GraphNode } from '../types';
 import { AIService } from '../services/aiService';
 
 /**
@@ -8,7 +8,6 @@ import { AIService } from '../services/aiService';
  */
 export function useAIFeatures() {
   const [graphInsight, setGraphInsight] = useState<string>("");
-  const [contextSummary, setContextSummary] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   /**
@@ -45,7 +44,6 @@ export function useAIFeatures() {
    */
   const clearInsights = useCallback(() => {
     setGraphInsight("");
-    setContextSummary("");
   }, []);
 
   return {
