@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Message, User, GraphNode, GraphLink, Task } from './types';
 import { USERS, AI_AGENT } from './constants';
-import { extractKeywords, detectActionItems } from './utils';
+import { extractKeywords, detectActionItems, generateId } from './utils';
 import { useGraphSimulation } from './hooks/useGraphSimulation';
 import Chat from './components/Chat';
 import KnowledgeGraph from './components/KnowledgeGraph';
@@ -26,11 +26,14 @@ export default function CommunityPulse() {
   const handleSendMessage = () => {
     if (!inputText.trim()) return;
 
+    const msgId = generateId();
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
     const newUserMsg: Message = {
-      id: Date.now(),
+      id: msgId,
       user: activeUser,
       text: inputText,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp
     };
 
     // 1. Update Chat
@@ -68,7 +71,8 @@ export default function CommunityPulse() {
     // 3. Update Actions (Task Board)
     const actionText = detectActionItems(newUserMsg.text);
     if (actionText) {
-      setTasks(prev => [...prev, { id: Date.now(), text: actionText, assignedTo: activeUser.name, completed: false }]);
+      const taskId = generateId();
+      setTasks(prev => [...prev, { id: taskId, text: actionText, assignedTo: activeUser.name, completed: false }]);
     }
 
     // 4. AI "Omni" Behavior Logic
@@ -94,11 +98,13 @@ export default function CommunityPulse() {
 
     if (responseText) {
       setTimeout(() => {
+        const aiMsgId = generateId() + 1;
+        const aiTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         setMessages(prev => [...prev, {
-          id: Date.now() + 1,
+          id: aiMsgId,
           user: AI_AGENT,
           text: responseText as string,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          timestamp: aiTimestamp
         }]);
       }, 1500); // Simulated typing delay
     }

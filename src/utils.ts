@@ -1,5 +1,10 @@
 import { KEYWORDS } from './constants';
 
+// Generate unique ID
+export const generateId = (): number => {
+  return Date.now();
+};
+
 // Node Extraction Logic
 export const extractKeywords = (text: string): string[] => {
   const found: string[] = [];
@@ -21,7 +26,7 @@ export const detectActionItems = (text: string): string | null => {
     /Action item: (.*)/i
   ];
 
-  for (let pattern of patterns) {
+  for (const pattern of patterns) {
     const match = text.match(pattern);
     if (match) return match[1]; // Return the captured group
   }
