@@ -1,12 +1,22 @@
 import { Activity } from 'lucide-react';
 import type { GraphNode, GraphLink } from '../types';
+import AIInsights from './AIInsights';
 
 interface KnowledgeGraphProps {
   nodes: GraphNode[];
   links: GraphLink[];
+  graphInsight?: string;
+  isAnalyzing?: boolean;
+  onRequestAnalysis?: () => void;
 }
 
-export default function KnowledgeGraph({ nodes, links }: KnowledgeGraphProps) {
+export default function KnowledgeGraph({
+  nodes,
+  links,
+  graphInsight,
+  isAnalyzing,
+  onRequestAnalysis
+}: KnowledgeGraphProps) {
   return (
     <div className="w-1/3 border-r border-slate-800 bg-slate-950 flex flex-col relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-900/50 to-slate-950 z-0 pointer-events-none"></div>
@@ -81,6 +91,13 @@ export default function KnowledgeGraph({ nodes, links }: KnowledgeGraphProps) {
           <p className="text-[10px] text-slate-600 uppercase">Live Force Simulation</p>
           <p className="text-[10px] text-slate-700">Keywords: Optimization, Deployment, Budget, API...</p>
         </div>
+
+        {/* AI Insights Overlay */}
+        <AIInsights
+          graphInsight={graphInsight}
+          isAnalyzing={isAnalyzing}
+          onRequestAnalysis={onRequestAnalysis}
+        />
       </div>
     </div>
   );

@@ -2,11 +2,12 @@ import { useRef, useEffect } from 'react';
 import { Send, MessageSquare } from 'lucide-react';
 import type { Message } from '../types';
 import { USERS } from '../constants';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '../hooks/useAppContext';
 
 interface ChatProps {
   messages: Message[];
   inputText: string;
+  isAIThinking?: boolean;
   onInputChange: (text: string) => void;
   onSendMessage: () => void;
 }
@@ -17,6 +18,7 @@ interface ChatProps {
 export default function Chat({
   messages,
   inputText,
+  isAIThinking = false,
   onInputChange,
   onSendMessage
 }: ChatProps) {
@@ -68,6 +70,23 @@ export default function Chat({
             </div>
           </div>
         ))}
+        {isAIThinking && (
+          <div className="flex flex-col items-start">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-700">
+                Om
+              </div>
+              <span className="text-xs text-slate-500">Omni is thinking...</span>
+            </div>
+            <div className="px-4 py-2 rounded-2xl rounded-tl-none text-sm bg-slate-800 border border-cyan-900 text-cyan-100">
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
+            </div>
+          </div>
+        )}
         <div ref={chatEndRef} />
       </div>
 

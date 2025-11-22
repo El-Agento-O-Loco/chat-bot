@@ -1,15 +1,17 @@
 import { useState, useCallback } from 'react';
 import type { Task } from '../types';
 import { TaskService } from '../services/taskService';
+import { generateId } from '../utils';
 
 /**
  * Custom hook for managing tasks/action items
+ * Now with AI-powered extraction support
  */
 export function useTasks(initialTasks: Task[] = []) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
   /**
-   * Attempts to extract and add a task from message text
+   * Attempts to extract and add a task from message text (regex fallback)
    */
   const extractTask = useCallback((messageText: string, assignedTo: string) => {
     const newTask = TaskService.extractTask(messageText, assignedTo);
@@ -17,6 +19,24 @@ export function useTasks(initialTasks: Task[] = []) {
       setTasks(prev => [...prev, newTask]);
     }
     return newTask;
+  }, []);
+
+  /**
+   * Add tasks from AI extraction (array of task strings)
+   */
+  const addAITasks = useCallback((taskTexts: string[], assignedTo: string) => {
+    const newTasks: Task[] = taskTexts.map(text => ({
+      id: generateId(),
+      text,
+      assignedTo,
+      completed: false
+    }));
+
+    if (newTasks.length > 0) {
+      setTasks(prev => [...prev, ...newTasks]);
+    }
+
+    return newTasks;
   }, []);
 
   /**
@@ -43,6 +63,7 @@ export function useTasks(initialTasks: Task[] = []) {
   return {
     tasks,
     extractTask,
+    addAITasks,
     toggleTask,
     deleteTask,
     clearAllTasks

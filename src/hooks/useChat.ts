@@ -11,32 +11,49 @@ interface UseChatOptions {
 
 /**
  * Custom hook for managing chat state and message handling
+ * Now with real AI integration!
  */
 export function useChat(options: UseChatOptions = {}) {
   const { initialMessages = [], onMessageSent } = options;
   const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [isAIThinking, setIsAIThinking] = useState(false);
 
   /**
    * Sends a user message and triggers AI response if needed
    */
-  const sendMessage = useCallback((user: User, text: string) => {
+  const sendMessage = useCallback(async (user: User, text: string) => {
     const newMessage = MessageService.createMessage(user, text);
     setMessages(prev => [...prev, newMessage]);
 
     // Trigger callback if provided
     onMessageSent?.(newMessage);
 
-    // Check if AI should respond
-    const aiResponse = AIService.getResponse(text, user);
-    if (aiResponse.shouldRespond) {
-      setTimeout(() => {
-        const aiMessage = MessageService.createMessage(AI_AGENT, aiResponse.text);
-        setMessages(prev => [...prev, aiMessage]);
-      }, AIService.getTypingDelay());
+    // Check if AI should respond (async now)
+    setIsAIThinking(true);
+    try {
+      const aiResponse = await AIService.getResponse(
+        text,
+        user,
+        messages // Pass conversation history for context
+      );
+
+      if (aiResponse.shouldRespond) {
+        // Simulate typing delay
+        setTimeout(() => {
+          const aiMessage = MessageService.createMessage(AI_AGENT, aiResponse.text);
+          setMessages(prev => [...prev, aiMessage]);
+          setIsAIThinking(false);
+        }, AIService.getTypingDelay());
+      } else {
+        setIsAIThinking(false);
+      }
+    } catch (error) {
+      console.error('AI Response Error:', error);
+      setIsAIThinking(false);
     }
 
     return newMessage;
-  }, [onMessageSent]);
+  }, [messages, onMessageSent]);
 
-  return { messages, sendMessage };
+  return { messages, sendMessage, isAIThinking };
 }
