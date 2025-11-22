@@ -1,31 +1,38 @@
 import { useRef, useEffect } from 'react';
 import { Send, MessageSquare } from 'lucide-react';
-import type { Message, User } from '../types';
+import type { Message } from '../types';
 import { USERS } from '../constants';
+import { useAppContext } from '../context/AppContext';
 
 interface ChatProps {
   messages: Message[];
-  activeUser: User;
   inputText: string;
-  onUserChange: (user: User) => void;
   onInputChange: (text: string) => void;
   onSendMessage: () => void;
 }
 
+/**
+ * Chat Component - Displays message history and input interface
+ */
 export default function Chat({
   messages,
-  activeUser,
   inputText,
-  onUserChange,
   onInputChange,
   onSendMessage
 }: ChatProps) {
+  const { activeUser, setActiveUser } = useAppContext();
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll chat
+  // Auto-scroll chat to bottom when new messages arrive
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      onSendMessage();
+    }
+  };
 
   return (
     <div className="w-1/3 border-r border-slate-800 flex flex-col">
@@ -67,14 +74,14 @@ export default function Chat({
       {/* Input Area */}
       <div className="p-4 bg-slate-900 border-t border-slate-800">
         <div className="flex flex-col gap-3">
-          {/* Simulation Controls */}
+          {/* User Selection Controls */}
           <div className="flex justify-between items-center text-xs text-slate-500">
             <span>Simulate as:</span>
             <div className="flex gap-2 bg-slate-950 p-1 rounded-lg border border-slate-800">
               {USERS.map(u => (
                 <button
                   key={u.id}
-                  onClick={() => onUserChange(u)}
+                  onClick={() => setActiveUser(u)}
                   className={`px-2 py-1 rounded transition-colors ${activeUser.id === u.id ? 'bg-slate-700 text-white' : 'hover:text-slate-300'}`}
                 >
                   {u.name}
@@ -89,7 +96,7 @@ export default function Chat({
               type="text"
               value={inputText}
               onChange={(e) => onInputChange(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && onSendMessage()}
+              onKeyDown={handleKeyDown}
               placeholder="Type a message or @Omni..."
               className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
             />
